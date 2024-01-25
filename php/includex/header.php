@@ -7,7 +7,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <title>Document</title>
 </head>
+<?php session_start();?>
 <body>
+
     <header class="header">
         <a href="index.php"><img src="assets/ressources/header/logo1.png" alt="" class="header_logo" ></a>
         <nav class="header_navi">
@@ -22,6 +24,7 @@
              <li class="bloc_recherche"><input type="text"  class="rechercher hidden" placeholder="Rechercher..."><i class="fa-solid fa-magnifying-glass fa-xl loupe"></i></li>
              <li class="connexion_button"><i class="fa-solid fa-user fa-xl" ></i></li>
              <li><a href="#"><i class="fa-solid fa-basket-shopping fa-xl"></i></a></li>
+             <li><button><a href="index.php"><i class="fa-solid fa-power-off"></i></a></button></li>
             </ul>
              <!-- <img src="ressources/header/loupe.svg" alt="">
              <img src="ressources/header/panier.png" alt="">

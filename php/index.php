@@ -23,20 +23,3 @@ include("includex/inscription.php");
 include("includex/footer.php");
 ?>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

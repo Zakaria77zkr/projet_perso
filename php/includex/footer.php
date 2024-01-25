@@ -96,7 +96,8 @@
         </footer>
         
     </body>
-<script src="assets/js/script.js"></script>
+    <script async src="assets/js/script.js"></script>
+    <script async src="assets/js/fonction.js"></script>
 </html>
 
 

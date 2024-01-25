@@ -1,3 +1,37 @@
+<?php
+// Démarrage de session
+
+
+// initialisation de mes variables
+$_SESSION["compte-errors"] = [];
+$prenom="";
+$nom="";
+$mail ="";
+$password="";
+
+// vérifications des erreurs de sessions compte-données
+
+if(isset($_SESSION["compte-données"]) && count($_SESSION["compte-données"]) > 0); {
+
+    $_SESSION["compte-données"]["nom"] = $nom;
+    $_SESSION["compte-données"]["prenom"] = $prenom;
+    $_SESSION["compte-données"]["mail"] = $mail; 
+    $_SESSION["compte-données"]["password"] = $password;
+}
+ // suppression des données de la session "compte-donées" (l'utilisateur probable du formulaire)
+unset($_SESSION["compte-données"]);
+
+ // suppression des données de la session "compte-donées" (l'utilisateur probable du formulaire)
+ unset($_SESSION["compte-données"]);
+
+ // Verification erreur sql
+ if(isset($_SESSION["compte-errors-sql"])) {
+    // récupération d'erreur sql et assignation de la variable
+    $errorsSQL = $_SESSION;["compte-errors-sql"];
+    // Suppression des données de session "compte-erreur-sql"
+    unset($_SESSION["compte-errors-sql"]);
+ }
+?>
 
 <div class="inscription_container  hidden">
         <div class="inscription_div ">
@@ -5,16 +39,24 @@
                 <button class="close_inscri">&times;</button>
 
                 <h1 class="inscription_titre">Créer un compte</h1>
-                <form action="get" class="inscription_form">
+                <?php
+                    // Afficher l'erreur
+                    if(isset($errorsSQL)){
+                        echo "<div>$errorsSQL</div>";
+                        return false;
+                        session_destroy();
+                    }
+                ?>
+                <form action="includex/traitement_inscri.php" method="post" class="inscription_form" onsubmit="return verifpass()">
                     <div class="inscription_radio">
-                        <input type="radio" id="M." name="genre"><label for="M.">M.</label>
-                        <input type="radio" id="Mme" name="genre"><label for="Mme">Mme.</label>
+                        <input type="radio" id="M." name="genre" value="monsieur"><label for="monsieur">M.</label>
+                        <input type="radio" id="Mme" name="genre" value="madame"><label for="madame">Mme.</label>
                     </div>
                     <div class="nomprenom">
-                        <input type="text" placeholder="Nom*">
-                        <input type="text" placeholder="Prénom*">
+                        <input type="text" name="nom" placeholder="Nom*" pattern="[/^[A-Za-z0-9\x{00c0}-\x{00ff}]{5,20}$/u]">
+                        <input type="text" name="prenom" placeholder="Prénom*" pattern="[/^[A-Za-z0-9\x{00c0}-\x{00ff}]{5,20}$/u]">
                     </div>
-                    <div class="form_date">
+                    <!-- <div class="form_date">
                         <select name="jour" class="jour">
                             <option value="-1">Jour</option>
                             <option value=" 1"> 1</option>
@@ -152,11 +194,11 @@
                             <option value="2023">2023</option>
                         </select>
                         
-                    </div>
+                    </div> -->
                     <div class="inscription_emailmdp">
-                        <input type="email" placeholder="Email*">
-                        <input type="password" placeholder="Mot de passe">
-                        <input type="password" placeholder="Confirmation du mot de passe*">
+                        <input type="email" name="mail" placeholder="Email*" pattern="/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,4}$/">
+                        <input type="password" name="password" placeholder="Mot de passe" pattern="[A-Za-z0-9_$]{8,}">
+                        <input type="password" placeholder="Confirmation du mot de passe*" pattern="[A-Za-z0-9_$]{8,}">
                     </div>
                     <input type="submit" value="CRÉER MON COMPTE" class="inscription_submit">
                 </form>
@@ -165,7 +207,7 @@
                     <a class="connexion_lien">Déja Membre ? Se connecter</a>
                 </div>  
             </section>  
-                
         </div>
         <div class="overlay_inscri"></div>
     </div>
+    
