@@ -1,0 +1,215 @@
+<?php
+// Inclusion des fichiers nécessaires
+include_once "inc/constant2.php";
+include_once "includex/fonction.php";
+
+// Définition des messages d'erreur ou de succès
+$error_message = "";
+$success_message = "";
+
+// Vérification si les champs requis sont remplis
+if (
+    !empty($_POST["genre"])
+    && !empty($_POST["nom"])
+    && !empty($_POST["prenom"])
+    && !empty($_POST["date"])
+    && isset($_POST["mail"])
+    && isset($_POST["password"])
+) {
+    $genre = htmlspecialchars($_POST["genre"]);
+    $nom = htmlspecialchars($_POST["nom"]);
+    $prenom = $_POST["prenom"];
+    $date = $_POST["date"];
+    $mail = $_POST["mail"];
+    $password = $_POST["password"];
+
+    // Vérification de la complexité du mot de passe
+    if (verif_pass($password)) {
+        $password_hash = password_hash($password, PASSWORD_ARGON2I); // Hashage du mot de passe
+        $mail = htmlspecialchars($_POST["mail"]);
+
+        // Préparer la requête SQL
+        $sql_check_email = "SELECT COUNT(*) AS count FROM particular WHERE mail = ?";
+        $stmt_check_email = $pdo->prepare($sql_check_email);
+        $stmt_check_email->execute([$mail]);
+        $row = $stmt_check_email->fetch(PDO::FETCH_ASSOC);
+
+        // Vérifier si l'adresse e-mail existe déjà
+        if ($row['count'] > 0) {
+            $error_message = "Adresse e-mail déjà utilisée.";
+        } else {
+            // Vérification de l'adresse email
+            if (!verif_mail($mail)) {
+                $error_message = "Adresse e-mail non valide.";
+            } else {
+                try {
+                    // Préparation et exécution de la requête SQL pour insérer les données dans la base de données
+                    $sql_insert_user = "INSERT INTO particular (genre, nom, prenom, date, mail, password) VALUES (?, ?, ?, ?, ?, ?)";
+                    $stmt_insert_user = $pdo->prepare($sql_insert_user);
+                    $stmt_insert_user->execute([$genre, $nom, $prenom, $date, $mail, $password_hash]);
+
+                    if ($stmt_insert_user->rowCount() > 0) {
+                        $success_message = "Compte créé avec succès.";
+                    } else {
+                        $error_message = "Problème lors de la création du compte. Veuillez contacter l'administrateur.";
+                    }
+                } catch (Exception $error) {
+                    $error_message = "Problème de base de données. Contactez immédiatement un administrateur !";
+                }
+            }
+        }
+    } else {
+        // Si le mot de passe ne satisfait pas les critères de complexité
+        $error_message = "Le mot de passe doit contenir au moins 8 caractères avec au moins une majuscule, un chiffre et au moins un caractère spécial.";
+    }
+} else {
+    // Si tous les champs requis ne sont pas remplis
+    $error_message = "Veuillez remplir correctement tous les champs.";
+}
+
+
+session_start();
+// Affichage des messages d'erreur ou de succès
+if (!empty($error_message)) {
+    $_SESSION['error_message'] = $error_message;
+    // echo "<p class='error'>$error_message</p>";
+    header('Location: inscription.php');
+}
+
+if (!empty($success_message)) {
+    $_SESSION['success_message'] = $success_message;
+    // echo "<p class='success'>$success_message</p>";
+    header('Location: index.php');
+}
+// Redirection vers la page du formulaire
+
+?>
+
+<!-- inscription.php -->
+
+<?php
+// Récupération et suppression des messages d'erreur et de succès
+$error_message = isset($_SESSION['error_message']) ? $_SESSION['error_message'] : '';
+$success_message = isset($_SESSION['success_message']) ? $_SESSION['success_message'] : '';
+unset($_SESSION['error_message']);
+unset($_SESSION['success_message']);
+?>
+
+<div class="inscription_container hidden">
+    <div class="inscription_div">
+        <section class="inscription_section">
+            <button class="close_inscri">&times;</button>
+
+            <h1 class="inscription_titre">Créer un compte</h1>
+
+            <!-- Affichage des messages d'erreur -->
+            <?php if (!empty($error_message)) : ?>
+                <div class="error_message"><?php echo $error_message; ?></div>
+            <?php endif; ?>
+
+            
+
+            <!-- Formulaire -->
+
+            <!-- constant.php
+            // Connexion à la base de données
+
+$db_host = "localhost";
+$db_name = "projet_perso";
+$db_user= "root";
+$db_password= "";
+
+// Création objet PDO pour se connecter à la BDD
+try {
+    $pdo = new PDO("mysql:host=$db_host;db_name=$db_name;charset=utf8",$db_user,$db_password);
+    // Configuration supplémentaire si nécessaire (par exemple, définir le mode d'erreur)
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    echo "Erreur de connexion à la base de données : " . $e->getMessage();
+    // Arrêter le script ou gérer l'erreur autrement
+    exit();
+}
+?> -->
+
+
+
+update_pprofile
+<?php
+
+// Inclusion des fichiers nécessaires
+include_once "../inc/constant.php"; // Inclusion du fichier contenant la connexion à la base de données
+include_once "fonction.php"; // Inclusion du fichier contenant des fonctions utilitaires
+
+if(!empty($_POST["prenom"]) && !empty($_POST["nom"]) && !empty($_POST["user_id"]) && !empty($_POST["mail"])) {
+
+    $id = $_POST["user_id"];
+    try {
+        $sql = "UPDATE particular SET prenom=?, nom=?, mail=? WHERE user_id=?";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$_POST["prenom"], $_POST["nom"], $_POST["mail"], $id]);
+        echo "Compte mis à jour";
+    } catch (Exception $error) {
+        echo $error->getMessage();
+    }
+} else {
+    echo "Veuillez remplir correctement les champs";
+}
+
+?>
+
+<?php
+// Inclusion des fichiers nécessaires
+include_once "../inc/constant.php";
+include_once "fonction.php";
+
+// Vérification si les champs requis sont remplis
+if (isset($_POST["mail"]) && isset($_POST["password"])) {
+    $mail = $_POST["mail"];
+    $password = $_POST["password"];
+
+    try {
+        // Préparer la requête SQL pour récupérer l'utilisateur par son email
+        $sql = "SELECT * FROM users WHERE mail = ?";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$mail]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Vérifier si l'utilisateur existe
+        if ($user) {
+            // Vérifier si le mot de passe est correct
+            if (password_verify($password, $user['password'])) {
+                // Authentification réussie
+                session_start();
+                $_SESSION['user'] = array(
+                    'prenom' => $user['prenom'],
+                    'nom' => $user['nom'],
+                    'mail' => $user['mail'],
+                    'id' => $user['user_id']
+                ); // Création du tableau associatif user et attribution à la session
+                header("location:../index.php");
+                exit(); // Assurez-vous de quitter le script après la redirection
+            } else {
+                // Mot de passe incorrect
+                $_SESSION['message'] = "Mot de passe incorrect.";
+                header("location:../index.php");
+                exit();
+            }
+        } else {
+            // Utilisateur non trouvé
+            $_SESSION['message'] = "Utilisateur non trouvé.";
+            header("location:../index.php");
+            exit();
+        }
+    } catch (Exception $error) {
+        // Erreur de base de données
+        $_SESSION['message'] = "Erreur de base de données : " . $error->getMessage();
+        header("location:../index.php");
+        exit();
+    }
+} else {
+    // Si tous les champs requis ne sont pas remplis
+    $_SESSION['message'] = "Veuillez remplir correctement les champs";
+    header("location:../index.php");
+    exit();
+}
+?>
